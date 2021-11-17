@@ -9,19 +9,28 @@ Relay   1 -  8, will be on address 3, F1 - F8
 
 */
 
-#define relayPin1 3
-#define relayPin2 4
-#define relayPin3 5
-#define relayPin4 6
-#define relayPin5 7
-#define relayPin6 8
-#define relayPin7 9
-#define relayPin8 10
+const int relayPin1     = 3 ;
+const int relayPin2     = 4 ;
+const int relayPin3     = 5 ;
+const int relayPin4     = 6 ;
+const int relayPin5     = 7 ;
+const int relayPin6     = 8 ;
+const int relayPin7     = 9 ;
+const int relayPin8     = 10 ;
+const int dirPin1       = 11 ;
+const int dirPin2       = 11 ;
+const int enablePin     = A0 ;
+const int CS            = A6 ;
+const int max45dir      = 2 ;
 
-#define dirPin1 11
-#define dirPin2 11
-#define enablePin A0
-
-#define CS A6
-
-#define dirPin 2
+const uint8_t relay[] = 
+{
+    relayPin1,
+    relayPin2,
+    relayPin3,
+    relayPin4,
+    relayPin5,
+    relayPin6,
+    relayPin7,
+    relayPin8
+} ;

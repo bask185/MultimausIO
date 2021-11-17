@@ -3,7 +3,7 @@
 
 Adafruit_PWMServoDriver servoDriver ;// = Adafruit_PWMServoDriver();
 
-#define nTurnouts 8
+#define nTurnouts 16
 
 typedef struct Turnouts {
 	uint8_t lowPos ; 
