@@ -13,7 +13,7 @@ const int DECEL_FACTOR  =    100 ;
 const int SPEED_MAX     =    100 ;
 const int SPEED_MIN     =     10 ;
 
-uint16_t interval = 0 ;
+uint16_t interval = 100 ;
 
 XpressNetMasterClass    Xnet ;
 
