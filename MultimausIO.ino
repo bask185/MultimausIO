@@ -122,8 +122,8 @@ void setOutput( uint8_t Address, uint8_t functions )
             if( functions & bitMask ) state = 1 ;    // on
             else                      state = 0 ;    // off
 
-            if( ioNumber <= 18 ) setTurnout( ioNumber - 1 , state ) ;
-            else                 digitalWrite( relay[ioNumber-21], state^1 ) ; // (31, 38) -> (0,7)  // relais module need IO inverted
+            if( ioNumber <= 8 ) setTurnout( ioNumber - 1 , state ) ;
+            else                digitalWrite( relay[ioNumber-21], state^1 ) ; // (31, 38) -> (0,7)  // relais module need IO inverted
 
             return ;
         }
