@@ -122,7 +122,7 @@ void setOutput( uint8_t Address, uint8_t functions )
             if( functions & bitMask ) state = 1 ;    // on
             else                      state = 0 ;    // off
 
-            if( ioNumber <= 18 ) setTurnout( ioNumber, state ) ;
+            if( ioNumber <= 18 ) setTurnout( ioNumber - 1 , state ) ;
             else                 digitalWrite( relay[ioNumber-21], state^1 ) ; // (31, 38) -> (0,7)  // relais module need IO inverted
 
             return ;
@@ -134,6 +134,22 @@ void setOutput( uint8_t Address, uint8_t functions )
 
 void notifyXNetLocoFunc1( uint16_t Address, uint8_t Func1 ) { setOutput( Address, Func1 | F1_F4 ) ; } // called from Xnet library
 void notifyXNetLocoFunc2( uint16_t Address, uint8_t Func2 ) { setOutput( Address, Func2 | F5_F8 ) ; }
+
+void notifyXNetLocoFunc3( uint16_t Address, uint8_t Func )
+{
+    static uint8_t prevFunc = 0xFF ;
+
+    if( (Func & 0b01) != (prevFunc & 0b01) ) //  f9 is pressed
+    {
+        
+    }
+    if( (Func & 0b10) != (prevFunc & 0b10) ) // f10 is pressed
+    {
+
+    }
+
+    prevFunc = Func ;
+}
 
 void notifyXNetPower(uint8_t State) 
 {
@@ -191,7 +207,7 @@ void loop()
     throttle.update() ;
     updateSpeed() ;
     shortCircuit() ;
-    REPEAT_MS( 50 )
-    turnOffServo() ;
-    END_REPEAT
+    //REPEAT_MS( 50 )
+    //turnOffServo() ;
+    //END_REPEAT
 }
