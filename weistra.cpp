@@ -19,6 +19,12 @@ void Weistra::begin()
 
 void Weistra::update() 
 {
+    if( state == 0 )
+    {
+        *portx_p &= ~trackPin ;
+        return ;
+    }
+
     if( portx_p != 0 )
     {
         uint32_t currentTime = micros() ; 

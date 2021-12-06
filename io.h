@@ -17,11 +17,13 @@ const int relayPin5     = 7 ;
 const int relayPin6     = 8 ;
 const int relayPin7     = 9 ;
 const int relayPin8     = 10 ;
+
 const int dirPin1       = 11 ;
-const int dirPin2       = 11 ;
+const int dirPin2       = 12 ;
 const int enablePin     = A0 ;
 const int CS            = A6 ;
 const int max45dir      = 2 ;
+const int ledPin        = 13 ;
 
 const uint8_t relay[] = 
 {

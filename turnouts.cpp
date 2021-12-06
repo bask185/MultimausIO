@@ -12,11 +12,15 @@ typedef struct Turnouts {
 } ;
 Turnouts turnout[ nTurnouts ];
 
+static uint32_t prevTime ;
+static uint8_t lastServo ;
+
 void initTurnouts() 
 {
-    servoDriver.begin();
-    servoDriver.setOscillatorFrequency(27000000);
-    servoDriver.setPWMFreq(50);  // Analog servos run at ~50 Hz updates
+    servoDriver.begin() ;
+    servoDriver.reset() ;
+    servoDriver.setOscillatorFrequency( 27000000 ) ;
+    servoDriver.setPWMFreq( 50 ) ;  // Analog servos run at ~50 Hz updates
 
     // digitalWrite(13, HIGH) ;
     // servoDriver.sleep() ;
@@ -34,11 +38,11 @@ void initTurnouts()
     turnout[5].lowPos =  74 ; turnout[5].highPos = 106 ; turnout[5].state = 1 ; // 6
     turnout[6].lowPos = 106 ; turnout[6].highPos =  74 ; turnout[6].state = 1 ; // 7
 
-    for(byte j = 1 ; j < 8 ; j ++ ) 
-    {
-        setTurnout( j, 0 ) ;
-        delay(200);
-    }
+    // for(byte j = 1 ; j < 8 ; j ++ ) 
+    // {
+    //     setTurnout( j, 0 ) ;
+    //     delay(200);
+    // }
 }
 
 
@@ -57,6 +61,20 @@ void setTurnout( uint8_t ID, uint8_t state ) {
 
         uint16_t us = map( degrees, 0, 180, 204, 408 );             // map degrees to pulse lengths, numbers don't make sense but it works
         servoDriver.setPWM( ID, 0, us );
+
+        lastServo = ID ;
+        prevTime = millis() ;                                 // set timeout to cut off servo's
     }
 }
 
+void turnOffServo()
+{
+    uint32_t currentTime = millis() ;
+
+    if( currentTime - prevTime >= 200 )      // servo gets 0.2s to move
+    {
+        prevTime = currentTime ; 
+        servoDriver.setPin( lastServo , 0, 0 ) ;
+    }
+
+}
