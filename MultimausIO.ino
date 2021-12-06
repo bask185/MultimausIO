@@ -68,6 +68,8 @@ void notifyXNetLocoDrive28( uint16_t Address, uint8_t Speed )  // N.B. it may be
 
 void updateSpeed()                                                  // handles speed and acceleration/braking times
 {
+    if( throttle.getState() == 0 ) return ;
+
     REPEAT_MS( ACCEL_FACTOR );
     static int8_t speedPrev ;
 
@@ -123,7 +125,7 @@ void setOutput( uint8_t Address, uint8_t functions )
             else                      state = 0 ;    // off
 
             if( ioNumber <= 8 ) setTurnout( ioNumber - 1 , state ) ;
-            else                digitalWrite( relay[ioNumber-21], state^1 ) ; // (31, 38) -> (0,7)  // relais module need IO inverted
+            else                digitalWrite( relay[ioNumber-11], state^1 ) ; // (21, 28) -> (0,7)  // relais module need IO inverted
 
             return ;
         }
@@ -141,14 +143,12 @@ void notifyXNetLocoFunc3( uint16_t Address, uint8_t Func )
 
     if( (Func & 0b01) != (prevFunc & 0b01) ) //  f9 is pressed
     {
-        
+        adjustServo( F9 ) ;
     }
     if( (Func & 0b10) != (prevFunc & 0b10) ) // f10 is pressed
     {
-
+        adjustServo( F10 ) ;
     }
-
-    prevFunc = Func ;
 }
 
 void notifyXNetPower(uint8_t State) 
@@ -163,7 +163,7 @@ void notifyXNetPower(uint8_t State)
         digitalWrite( ledPin,  LOW ) ; 
         throttle.setState( 0 ) ;                                                    // turn off track power
         currentSpeed = 0 ;                                                          // reset speed as well so train does not jump away when power is enabled.
-        setPoint = 0 ;                                                              // ensures that the maus's knob needs to be turned before train moves again
+        //setPoint = 0 ;                                                              // ensures that the maus's knob needs to be turned before train moves again
     }
 }
 
@@ -207,7 +207,8 @@ void loop()
     throttle.update() ;
     updateSpeed() ;
     shortCircuit() ;
-    //REPEAT_MS( 50 )
-    //turnOffServo() ;
-    //END_REPEAT
+
+    REPEAT_MS( 50 )
+    turnOffServo() ;
+    END_REPEAT
 }
