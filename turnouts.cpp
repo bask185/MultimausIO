@@ -64,6 +64,8 @@ void setTurnout( uint8_t ID, uint8_t state )
         if( state ) degrees = turnout[ID].highPos;
         else        degrees = turnout[ID].lowPos;
 
+        degrees = constrain( degrees, 20, 160 ) ;
+
         uint16_t us = map( degrees, 0, 180, 204, 408 );             // map degrees to pulse lengths, numbers don't make sense but it works
         servoDriver.setPWM( ID, 0, us );
 
@@ -86,26 +88,21 @@ void adjustServo( int8_t F9_F10 )
     {
         eeAddress = ADDR_S1 + (lastServo * 2) ;
         turnout[lastServo].lowPos  += F9_F10 ;          // add or substract 
+        turnout[lastServo].lowPos = constrain( turnout[lastServo].lowPos, 20, 160 ) ;
         setTurnout( lastServo, 0 ) ;                    // update servo
-        EEPROM.write(eeAddress, turnout[lastServo].highPos ) ;         
+        EEPROM.write(eeAddress, turnout[lastServo].lowPos ) ;         
     }
     else
     {                                                   // ... OR HIGH POSITIONS
         eeAddress = ADDR_S1 + (lastServo * 2) + 1;
         turnout[lastServo].highPos += F9_F10 ; 
+        turnout[lastServo].highPos = constrain( turnout[lastServo].highPos, 20, 160 ) ;
         setTurnout( lastServo, 1 ) ;
         EEPROM.write( eeAddress , turnout[lastServo].highPos ) ; 
     }
 
-    for( int i = 0 ; i < 8 ; i ++ )
-    {
-        byte state ;
-        if( eeAddress & (1 << i)) state = 1 ; else state = 0 ;
-        digitalWrite( relay[i], state ) ;
-    }
-
-    if( F9_F10 ==  F9 ) digitalWrite( relay[7], HIGH ) ;
-    if( F9_F10 == F10 ) digitalWrite( relay[7],  LOW ) ;
+    // if( F9_F10 ==  F9 ) digitalWrite( relay[7], HIGH ) ;
+    // if( F9_F10 == F10 ) digitalWrite( relay[7],  LOW ) ;
 }
 
 void turnOffServo()
