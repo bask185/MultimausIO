@@ -149,6 +149,20 @@ void notifyXNetLocoFunc3( uint16_t Address, uint8_t Func )
     {
         adjustServo( F10 ) ;
     }
+
+    // if( Func & 0b1100 )                 // WHIPE EEPROM MEMORY IF BOTH F11 AND F12 ARE SET
+    // {
+    //     whipeEEPROM() ;
+    //     bool PIGS_CAN_FLY = true ;
+    //     while( PIGS_CAN_FLY == true )
+    //     {
+    //         delay(100);
+    //         PORTB ^= (1 << 5 ) ;
+    //     }
+    // }
+
+
+    prevFunc = Func ;
 }
 
 void notifyXNetPower(uint8_t State) 

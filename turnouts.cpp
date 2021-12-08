@@ -6,12 +6,12 @@
 #define INIT_ADDR       0X00
 #define ADDR_S1         0X01
 #define ADDR_S2         0X03
-#define ADDR_S3         0X04
-#define ADDR_S4         0X05
-#define ADDR_S5         0X07
-#define ADDR_S6         0X09
-#define ADDR_S7         0X0B
-#define ADDR_S8         0X0D
+#define ADDR_S3         0X05
+#define ADDR_S4         0X07
+#define ADDR_S5         0X09
+#define ADDR_S6         0X0B
+#define ADDR_S7         0X0D
+#define ADDR_S8         0X0F
 
 Adafruit_PWMServoDriver servoDriver ;// = Adafruit_PWMServoDriver();
 
@@ -34,60 +34,28 @@ void initTurnouts()
     servoDriver.setOscillatorFrequency( 27000000 ) ;
     servoDriver.setPWMFreq( 50 ) ;  // Analog servos run at ~50 Hz updates
 
-    // digitalWrite(13, HIGH) ;
-    // servoDriver.sleep() ;
-    // delay(1000);
-    // digitalWrite(13, LOW) ;
-    // servoDriver.wakeup();
-    // servoDriver.reset() ;
-    // delay(1000);
-
-    // EEPROM.write( INIT_ADDR, ~255 ) ;       //for update
     if( EEPROM.read( INIT_ADDR ) == 255)
     {
-        EEPROM.write( INIT_ADDR, 0xCC   ) ; // some random value to make it not 255 :-D
-        EEPROM.write( ADDR_S1     ,  95 ) ; 
-        EEPROM.write( ADDR_S1 + 1 ,  85 ) ; 
-        EEPROM.write( ADDR_S2     ,  85 ) ;
-        EEPROM.write( ADDR_S2 + 1 ,  95 ) ; 
-        EEPROM.write( ADDR_S3     ,  85 ) ; 
-        EEPROM.write( ADDR_S3 + 1 ,  95 ) ; 
-        EEPROM.write( ADDR_S4     ,  95 ) ; 
-        EEPROM.write( ADDR_S4 + 1 ,  85 ) ; 
-        EEPROM.write( ADDR_S5     ,  85 ) ; 
-        EEPROM.write( ADDR_S5 + 1 ,  95 ) ; 
-        EEPROM.write( ADDR_S6     ,  85 ) ; 
-        EEPROM.write( ADDR_S6 + 1 ,  95 ) ; 
-        EEPROM.write( ADDR_S7     ,  95 ) ; 
-        EEPROM.write( ADDR_S7 + 1 ,  85 ) ; 
-        EEPROM.write( ADDR_S8     ,  95 ) ;  // not in use
-        EEPROM.write( ADDR_S8 + 1 ,  85 ) ; 
-    }
-    
-    turnout[0].lowPos = EEPROM.read( ADDR_S1 ) ; turnout[0].highPos = EEPROM.read( ADDR_S1 + 1 ) ;  // turnout[0].state = 1 ; // 1 N.B I should be stuffed in a for-loop later on
-    turnout[1].lowPos = EEPROM.read( ADDR_S2 ) ; turnout[1].highPos = EEPROM.read( ADDR_S2 + 1 ) ;  // turnout[1].state = 1 ; // 2
-    turnout[2].lowPos = EEPROM.read( ADDR_S3 ) ; turnout[2].highPos = EEPROM.read( ADDR_S3 + 1 ) ;  // turnout[2].state = 1 ; // 3
-    turnout[3].lowPos = EEPROM.read( ADDR_S4 ) ; turnout[3].highPos = EEPROM.read( ADDR_S4 + 1 ) ;  // turnout[3].state = 1 ; // 4
-    turnout[4].lowPos = EEPROM.read( ADDR_S5 ) ; turnout[4].highPos = EEPROM.read( ADDR_S5 + 1 ) ;  // turnout[4].state = 1 ; // 5
-    turnout[5].lowPos = EEPROM.read( ADDR_S6 ) ; turnout[5].highPos = EEPROM.read( ADDR_S6 + 1 ) ;  // turnout[5].state = 1 ; // 6
-    turnout[6].lowPos = EEPROM.read( ADDR_S7 ) ; turnout[6].highPos = EEPROM.read( ADDR_S7 + 1 ) ;  // turnout[6].state = 1 ; // 7
-    turnout[7].lowPos = EEPROM.read( ADDR_S8 ) ; turnout[7].highPos = EEPROM.read( ADDR_S8 + 1 ) ;  // turnout[7].state = 1 ; // 8
+         EEPROM.write( INIT_ADDR, 0xCC ) ;
 
-    // for(byte j = 0 ; j < 8 ; j ++ ) 
-    // {
-    //     uint16_t us = map( 90, 0, 180, 204, 408 );             // map degrees to pulse lengths, numbers don't make sense but it works
-    //     servoDriver.setPWM( j, 0, us );
-    //     delay(200);
-    // }
+        for( int i = 0 ; i < 8 ; i ++ ) 
+        {
+            EEPROM.write( ADDR_S1 + ( 2 * i )     , 85 ) ;
+            EEPROM.write( ADDR_S1 + ( 2 * i ) + 1 , 95 ) ;
+        }
+    }
+
+    for( int i = 0 ; i < 8 ; i ++ ) 
+    {
+         turnout[i].lowPos  = EEPROM.read( ADDR_S1 + ( 2 * i )     ) ;
+         turnout[i].highPos = EEPROM.read( ADDR_S1 + ( 2 * i ) + 1 ) ;
+    }
 }
 
 
 void setTurnout( uint8_t ID, uint8_t state )
 {    
     if( ID <= nTurnouts ) {    // ignores non existing turnouts
-
-        if( state ) PORTB |=  (1<<5);
-        else        PORTB &= ~(1<<5);
 
         turnout[ID].state = state ;
 
@@ -108,40 +76,36 @@ void setTurnout( uint8_t ID, uint8_t state )
 /**
  * @brief Adjust every servo position real time and pushes change to EEPROM.
  * 
- * @param F9_F10 either -1 or +1.
+ * @param F9_F10 either -3 or +3.
  */
 void adjustServo( int8_t F9_F10 )
 {
-    if( turnout[lastServo].state == 0 )
+    uint16_t eeAddress ;
+
+    if( turnout[lastServo].state == 0 )                 // ADJUST EITHER LOW POSITION...
     {
-        turnout[lastServo].lowPos  += F9_F10 ;          // add or substract 1
-
-        // for( int i = 0 ; i < 8 ; i ++ )
-        // {
-        //     byte state ;
-        //     if( turnout[lastServo].lowPos & (1 << i)) state = 1 ; else state = 0 ;
-        //     digitalWrite( relay[i], state ) ;
-        // }
-
-
+        eeAddress = ADDR_S1 + (lastServo * 2) ;
+        turnout[lastServo].lowPos  += F9_F10 ;          // add or substract 
         setTurnout( lastServo, 0 ) ;                    // update servo
-        EEPROM.write( ADDR_S1 + (lastServo * 2)  ,      // commit change to EEPROM
-                      turnout[lastServo].highPos ) ; 
+        EEPROM.write(eeAddress, turnout[lastServo].highPos ) ;         
     }
     else
-    {
-        // for( int i = 0 ; i < 8 ; i ++ )
-        // {
-        //     byte state ;
-        //     if( turnout[lastServo].lowPos & (1 << i)) state = 1 ; else state = 0 ;
-        //     digitalWrite( relay[i], state ) ;
-        // }
-
+    {                                                   // ... OR HIGH POSITIONS
+        eeAddress = ADDR_S1 + (lastServo * 2) + 1;
         turnout[lastServo].highPos += F9_F10 ; 
         setTurnout( lastServo, 1 ) ;
-        EEPROM.write( ADDR_S1 + (lastServo * 2) + 1 , // one extra offset for the high pos address;
-                      turnout[lastServo].highPos ) ; 
+        EEPROM.write( eeAddress , turnout[lastServo].highPos ) ; 
     }
+
+    for( int i = 0 ; i < 8 ; i ++ )
+    {
+        byte state ;
+        if( eeAddress & (1 << i)) state = 1 ; else state = 0 ;
+        digitalWrite( relay[i], state ) ;
+    }
+
+    if( F9_F10 ==  F9 ) digitalWrite( relay[7], HIGH ) ;
+    if( F9_F10 == F10 ) digitalWrite( relay[7],  LOW ) ;
 }
 
 void turnOffServo()
@@ -154,4 +118,9 @@ void turnOffServo()
         servoDriver.setPin( lastServo , 0, 0 ) ;
     }
 
+}
+
+void whipeEEPROM()
+{
+    EEPROM.write( INIT_ADDR, 255 ) ;       //for update
 }
