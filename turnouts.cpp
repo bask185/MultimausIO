@@ -78,16 +78,16 @@ void setTurnout( uint8_t ID, uint8_t state )
 /**
  * @brief Adjust every servo position real time and pushes change to EEPROM.
  * 
- * @param F9_F10 either -3 or +3.
+ * @param F11_F12 either -3 or +3.
  */
-void adjustServo( int8_t F9_F10 )
+void adjustServo( int8_t F11_F12 )
 {
     uint16_t eeAddress ;
 
     if( turnout[lastServo].state == 0 )                 // ADJUST EITHER LOW POSITION...
     {
         eeAddress = ADDR_S1 + (lastServo * 2) ;
-        turnout[lastServo].lowPos  += F9_F10 ;          // add or substract 
+        turnout[lastServo].lowPos  += F11_F12 ;          // add or substract 
         turnout[lastServo].lowPos = constrain( turnout[lastServo].lowPos, 20, 160 ) ;
         setTurnout( lastServo, 0 ) ;                    // update servo
         EEPROM.write(eeAddress, turnout[lastServo].lowPos ) ;         
@@ -95,14 +95,11 @@ void adjustServo( int8_t F9_F10 )
     else
     {                                                   // ... OR HIGH POSITIONS
         eeAddress = ADDR_S1 + (lastServo * 2) + 1;
-        turnout[lastServo].highPos += F9_F10 ; 
+        turnout[lastServo].highPos += F11_F12 ; 
         turnout[lastServo].highPos = constrain( turnout[lastServo].highPos, 20, 160 ) ;
         setTurnout( lastServo, 1 ) ;
         EEPROM.write( eeAddress , turnout[lastServo].highPos ) ; 
     }
-
-    // if( F9_F10 ==  F9 ) digitalWrite( relay[7], HIGH ) ;
-    // if( F9_F10 == F10 ) digitalWrite( relay[7],  LOW ) ;
 }
 
 void turnOffServo()

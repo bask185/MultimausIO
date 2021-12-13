@@ -141,11 +141,11 @@ void notifyXNetLocoFunc3( uint16_t Address, uint8_t Func )
 {
     static uint8_t prevFunc = 0xFF ;
 
-    if( (Func & 0b01) != (prevFunc & 0b01) ) //  f9 is pressed
+    if( (Func & 0b0100) != (prevFunc & 0b0100) ) //  F11 is pressed
     {
         adjustServo( F9 ) ;
     }
-    if( (Func & 0b10) != (prevFunc & 0b10) ) // f10 is pressed
+    if( (Func & 0b1000) != (prevFunc & 0b1000) ) // F12 is pressed
     {
         adjustServo( F10 ) ;
     }
