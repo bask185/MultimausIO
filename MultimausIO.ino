@@ -141,26 +141,8 @@ void notifyXNetLocoFunc3( uint16_t Address, uint8_t Func )
 {
     static uint8_t prevFunc = 0xFF ;
 
-    if( (Func & 0b0100) != (prevFunc & 0b0100) ) //  F11 is pressed
-    {
-        adjustServo( F9 ) ;
-    }
-    if( (Func & 0b1000) != (prevFunc & 0b1000) ) // F12 is pressed
-    {
-        adjustServo( F10 ) ;
-    }
-
-    // if( Func & 0b1100 )                 // WHIPE EEPROM MEMORY IF BOTH F11 AND F12 ARE SET
-    // {
-    //     whipeEEPROM() ;
-    //     bool PIGS_CAN_FLY = true ;
-    //     while( PIGS_CAN_FLY == true )
-    //     {
-    //         delay(100);
-    //         PORTB ^= (1 << 5 ) ;
-    //     }
-    // }
-
+    if( (Func & 0b0100) != (prevFunc & 0b0100) ) { adjustServo( F11 ) ; }       // here we can use F0, to give the laid route free. We could also use the stop button to free a route.
+    if( (Func & 0b1000) != (prevFunc & 0b1000) ) { adjustServo( F12 ) ; }
 
     prevFunc = Func ;
 }
