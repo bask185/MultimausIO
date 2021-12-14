@@ -89,9 +89,22 @@ void updateSpeed()                                                  // handles s
     END_REPEAT
 }
 
+void layRoute( uint8_t route )
+{
+    static uint8_t firstButton, secondButton ;
+
+    if( firstButton  == 0xFF ) firstButton = route ;
+    if( secondButton == 0xFF ) secondButton = route ;
+
+    if( firstButton != 0xFF && secondButton != 0xFF )
+    {
+        
+    }
+}
+
 void setOutput( uint8_t Address, uint8_t functions )
 {
-    if( Address > 3) return ; // discard other addresses
+    if( Address == 3) return ; // address 3 is unused
 
     uint8_t number = 1 ;
     uint8_t indexShift = 0 ;
@@ -124,8 +137,10 @@ void setOutput( uint8_t Address, uint8_t functions )
             if( functions & bitMask ) state = 1 ;    // on
             else                      state = 0 ;    // off
 
-            if( ioNumber <= 8 ) setTurnout( ioNumber - 1 , state ) ;
-            else                digitalWrite( relay[ioNumber-11], state^1 ) ; // (21, 28) -> (0,7)  // relais module need IO inverted
+            if(      ioNumber <=  8 ) setTurnout( ioNumber - 1 , state ) ;             //  1 <->  8
+            else if( ioNumber <= 18 ) digitalWrite( relay[ioNumber-11], state^1 ) ;    // 11 <-> 18
+            else if( ioNumber <= 38 ) layRoute( ioNumber - 31 )                        // 31 <-> 38
+            //else if( ioNumber <= 38 ) runProgram( ioNumber - 31)                       // 41 <-> 48
 
             return ;
         }
@@ -133,6 +148,7 @@ void setOutput( uint8_t Address, uint8_t functions )
         number ++ ;
     }
 }
+
 
 void notifyXNetLocoFunc1( uint16_t Address, uint8_t Func1 ) { setOutput( Address, Func1 | F1_F4 ) ; } // called from Xnet library
 void notifyXNetLocoFunc2( uint16_t Address, uint8_t Func2 ) { setOutput( Address, Func2 | F5_F8 ) ; }

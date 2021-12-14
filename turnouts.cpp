@@ -106,7 +106,7 @@ void turnOffServo()
 {
     uint32_t currentTime = millis() ;
 
-    if( currentTime - prevTime >= 350 )      // servo gets 0.2s to move
+    if( currentTime - prevTime >= 200 )      // servo gets 0.2s to move
     {
         prevTime = currentTime ; 
         servoDriver.setPin( lastServo , 0, 0 ) ;
