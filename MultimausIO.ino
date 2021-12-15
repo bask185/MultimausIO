@@ -89,19 +89,6 @@ void updateSpeed()                                                  // handles s
     END_REPEAT
 }
 
-void layRoute( uint8_t route )
-{
-    static uint8_t firstButton, secondButton ;
-
-    if( firstButton  == 0xFF ) firstButton = route ;
-    if( secondButton == 0xFF ) secondButton = route ;
-
-    if( firstButton != 0xFF && secondButton != 0xFF )
-    {
-        
-    }
-}
-
 void setOutput( uint8_t Address, uint8_t functions )
 {
     if( Address == 3) return ; // address 3 is unused
@@ -139,8 +126,8 @@ void setOutput( uint8_t Address, uint8_t functions )
 
             if(      ioNumber <=  8 ) setTurnout( ioNumber - 1 , state ) ;             //  1 <->  8
             else if( ioNumber <= 18 ) digitalWrite( relay[ioNumber-11], state^1 ) ;    // 11 <-> 18
-            else if( ioNumber <= 38 ) layRoute( ioNumber - 31 )                        // 31 <-> 38
-            //else if( ioNumber <= 38 ) runProgram( ioNumber - 31)                       // 41 <-> 48
+            else if( ioNumber <= 38 ) setRoute( ioNumber - 31 )                        // 31 <-> 38
+            //else if( ioNumber <= 38 ) runProgram( ioNumber - 31)                     // 41 <-> 48
 
             return ;
         }
@@ -223,4 +210,9 @@ void loop()
     REPEAT_MS( 50 )
     turnOffServo() ;
     END_REPEAT
+
+    REPEAT_MS( 333 )
+    {
+        layRoutes() ;
+    } END_REPEAT
 }
