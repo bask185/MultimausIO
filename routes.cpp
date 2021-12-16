@@ -122,12 +122,12 @@ void layRoutes()
     counter ++ ;
 }
 
-void setRoute( uint8_t route )
+void setRoute( uint8_t track )
 {
     static uint8_t firstButton, secondButton ;
 
-    if( firstButton  == 0xFF ) firstButton = route ;
-    if( secondButton == 0xFF ) secondButton = route ;
+    if( firstButton  == 0xFF ) firstButton  = track ;
+    if( secondButton == 0xFF ) secondButton = track ;
 
     if( firstButton != 0xFF && secondButton != 0xFF )
     {
