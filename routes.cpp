@@ -1,11 +1,16 @@
 #include "routes.h"
 
-uint8_t counter, index ;
+uint8_t counter,  selectedRoute  ;
+const int elementsPerRoute  = 7 ;
+const int C                 = 0x80 ;                                            // curved
+const int S                 = 0x00 ;                                            // straight
+const int X                 = 0xFF ;                                            // dont care
 
-uint8_t getRouteIndex( uint8_t first, uint8_t second )
+
+uint8_t  getNewRoute ( uint8_t first, uint8_t second )
 {
-    if( second < first )      // route 1 <> 9 is the same as route 9 <> 1, 
-    {                         // therefor I use XOR ensure that the first number is the lowest
+    if( second < first )                                                        // route 1 <> 9 is the same as route 9 <> 1, 
+    {                                                                           // therefor I use XOR ensure that the first number is the lowest
         first  ^= second ;
         second ^=  first ;
         first  ^= second ;
@@ -13,7 +18,7 @@ uint8_t getRouteIndex( uint8_t first, uint8_t second )
 
     switch ( first ) {
 
-    // first      // second                 // index
+    // first      // second                 //  selectedRoute 
     case 1: switch( second ) { case 4 : return  1 ;
                                case 5 : return  2 ;
                                case 6 : return  3 ;
@@ -66,11 +71,10 @@ in practice only these are possible
 16). 6 -> 8     6|S, 7|S,  XX,  XX,  XX,   XX,  5 
 17). 6 -> 9     6|C,  XX,  XX,  XX,  XX,   XX,  6 
 
-There are only 17 routes possible, the routes with the most items has 7 outputs. Without compression, we need atleast 17x7 = 119 bytes in EEPROM or FLASH
+There are only 17 routes possible, the routes with the most items has 7 outputs. 
+Without compression, we need atleast 17x7 = 119 bytes in EEPROM or FLASH
 */
-#define C   0x80    // curved
-#define S   0x00    // straight
-#define X   0x00    // dont care
+
 const int routes[17][7] =
 {//        points              |  relays
     { 1|C, 2|C, 3|S,   X,   X,    1,  3 } ,
@@ -91,17 +95,29 @@ const int routes[17][7] =
     { 6|S, 7|S,   X,   X,   X,    X,  5 } ,
     { 6|C,   X,   X,   X,   X,    X,  6 } ,
 }
-#undef  C
-#undef  S
-#undef  X        
+  
 
 void layRoutes()
 {
-    if( counter == 8 ) return ;
-    uint8_t address = routes[index][counter]  & 0x7F ;
-    bool    state   = routes[index][counter] >>    7 ;
-    
-    
+    if( elementsPerRoute >= 7 ) return ;
+
+    REPEAT_MS( 50 )
+    {
+        uint8_t address = X ;
+        bool    state   ;
+
+        while( address == X )                                                   // keep looping until valid address is found
+        {
+            address = (routes[ selectedRoute ][counter]  & 0x7F) - 1 ;          // fetch new address
+            state   =  routes[ selectedRoute ][counter] >> 7 ;
+
+            if( ++ counter >= elementsPerRoute ) return ;
+        }
+
+        if( counter <= 4 )  setTurnout( address, state ) ;                      // 0-4 -> any of the 5 points
+        else                digitalWrite( relay[address], state ) ;             // 5-6 -> any of the 2 relays
+
+    } END_REPEAT
     
     counter ++ ;
 }
@@ -117,7 +133,7 @@ void setRoute( uint8_t route )
     {
         secondButton = firstButton = 0xFF ;
 
-        index = getRouteIndex( firstButton, secondButton) - 1 ;
-        counter = 0 ;
+        selectedRoute  =  getNewRoute ( firstButton, secondButton ) - 1 ;
+        counter = 0 ;                                                           // trigger the function "layRoutes" to start laying in the route
     }
 }

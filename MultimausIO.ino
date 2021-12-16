@@ -204,15 +204,15 @@ void loop()
 {
     Xnet.update() ;
     throttle.update() ;
+
     updateSpeed() ;
     shortCircuit() ;
 
     REPEAT_MS( 50 )
-    turnOffServo() ;
-    END_REPEAT
-
-    REPEAT_MS( 333 )
     {
-        layRoutes() ;
+        turnOffServo() ;
     } END_REPEAT
+
+
+    layRoutes() ;
 }
