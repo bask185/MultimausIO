@@ -4,6 +4,7 @@
 #include "macros.h"
 #include "turnouts.h"
 #include "weistra.h"
+#include "routes.h"
 
 const int F1_F4 = 0 ;
 const int F5_F8 = 0x80 ;
@@ -126,7 +127,7 @@ void setOutput( uint8_t Address, uint8_t functions )
 
             if(      ioNumber <=  8 ) setTurnout( ioNumber - 1 , state ) ;             //  1 <->  8
             else if( ioNumber <= 18 ) digitalWrite( relay[ioNumber-11], state^1 ) ;    // 11 <-> 18
-            else if( ioNumber <= 38 ) setRoute( ioNumber - 31 )                        // 31 <-> 38
+            else if( ioNumber <= 38 ) setRoute( ioNumber - 31 ) ;                      // 31 <-> 38
             //else if( ioNumber <= 38 ) runProgram( ioNumber - 31)                     // 41 <-> 48
 
             return ;
@@ -208,11 +209,7 @@ void loop()
     updateSpeed() ;
     shortCircuit() ;
 
-    REPEAT_MS( 50 )
-    {
-        turnOffServo() ;
-    } END_REPEAT
-
+    turnOffServo() ;
 
     layRoutes() ;
 }

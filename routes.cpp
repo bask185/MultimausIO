@@ -1,9 +1,15 @@
 #include "routes.h"
+#include "macros.h"
+
+
+extern void setOutput( uint8_t Address, uint8_t functions ) ;
+extern void setTurnout( uint8_t address, uint8_t state ) ; 
+extern const uint8_t relay[] ;
 
 uint8_t counter,  selectedRoute  ;
-const int elementsPerRoute  = 7 ;
-const int C                 = 0x80 ;                                            // curved
-const int S                 = 0x00 ;                                            // straight
+const int elementsPerRoute  =    7 ;
+const int C                 = 0x80 ;                                            //    curved
+const int S                 = 0x00 ;                                            //  straight
 const int X                 = 0xFF ;                                            // dont care
 
 
@@ -94,14 +100,14 @@ const int routes[17][7] =
     { 7|C,   X,   X,   X,   X,    X,  5 } ,
     { 6|S, 7|S,   X,   X,   X,    X,  5 } ,
     { 6|C,   X,   X,   X,   X,    X,  6 } ,
-}
+} ;
   
 
 void layRoutes()
 {
     if( elementsPerRoute >= 7 ) return ;
 
-    REPEAT_MS( 50 )
+    REPEAT_MS( 350 )
     {
         uint8_t address = X ;
         bool    state   ;
