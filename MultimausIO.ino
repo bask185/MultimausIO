@@ -60,34 +60,35 @@ uint8_t lookUpSpeed( uint8_t speed )
     case 0b11111 : return 28 ;
     }
 }
-void notifyXNetLocoDrive28( uint16_t Address, uint8_t Speed )  // N.B. it may be that I need other LocoDriveXX functions as well, depends on what multimaus is going to do.
+void notifyXNetLocoDrive28( uint16_t Address, uint8_t Speed )   // N.B. it may be that I need other LocoDriveXX functions as well, depends on what multimaus is going to do.
 {
     setPoint = lookUpSpeed( Speed & 0b00011111 ) ;
     setPoint = map( setPoint, 0, 28, 0, SPEED_MAX ) ;           // map 28 speedsteps to 100 for weistra control
     if( Speed & 0x80 ) setPoint = -setPoint ;
 }
 
-void updateSpeed()                                                  // handles speed and acceleration/braking times
+void updateSpeed()                                              // handles speed and acceleration/braking times
 {
     if( throttle.getState() == 0 ) return ;
 
-    REPEAT_MS( ACCEL_FACTOR );
-    static int8_t speedPrev ;
-
-    if( currentSpeed < setPoint ) currentSpeed ++ ;
-    if( currentSpeed > setPoint ) currentSpeed -- ;
-
-    if( currentSpeed < 0 ) { digitalWrite( dirPin1, HIGH ) ;
-                             digitalWrite( dirPin2,  LOW ) ; }
-    if( currentSpeed > 0 ) { digitalWrite( dirPin1,  LOW ) ;
-                             digitalWrite( dirPin2, HIGH ) ; }
-
-    if( currentSpeed != speedPrev )
+    REPEAT_MS( ACCEL_FACTOR )
     {
-        speedPrev = currentSpeed ;
-        throttle.setSpeed( abs(currentSpeed) ) ;
-    }
-    END_REPEAT
+        static int8_t speedPrev ;
+
+        if( currentSpeed < setPoint ) currentSpeed ++ ;
+        if( currentSpeed > setPoint ) currentSpeed -- ;
+
+        if( currentSpeed < 0 ) { digitalWrite( dirPin1, HIGH ) ;
+                                 digitalWrite( dirPin2,  LOW ) ; }
+        if( currentSpeed > 0 ) { digitalWrite( dirPin1,  LOW ) ;
+                                 digitalWrite( dirPin2, HIGH ) ; }
+
+        if( currentSpeed != speedPrev )
+        {
+            speedPrev = currentSpeed ;
+            throttle.setSpeed( abs(currentSpeed) ) ;
+        }
+    } END_REPEAT
 }
 
 void setOutput( uint8_t Address, uint8_t functions )
@@ -127,6 +128,7 @@ void setOutput( uint8_t Address, uint8_t functions )
 
             if(      ioNumber <=  8 ) setTurnout( ioNumber - 1 , state ) ;             //  1 <->  8
             else if( ioNumber <= 18 ) digitalWrite( relay[ioNumber-11], state^1 ) ;    // 11 <-> 18
+                                                                                       // 21 <-> 28  address 3 not used.
             else if( ioNumber <= 38 ) setRoute( ioNumber - 31 ) ;                      // 31 <-> 38
             //else if( ioNumber <= 38 ) runProgram( ioNumber - 31)                     // 41 <-> 48
 
@@ -145,7 +147,7 @@ void notifyXNetLocoFunc3( uint16_t Address, uint8_t Func )
 {
     static uint8_t prevFunc = 0xFF ;
 
-    if( (Func & 0b0100) != (prevFunc & 0b0100) ) { adjustServo( F11 ) ; }       // here we can use F0, to give the laid route free. We could also use the stop button to free a route.
+    if( (Func & 0b0100) != (prevFunc & 0b0100) ) { adjustServo( F11 ) ; }
     if( (Func & 0b1000) != (prevFunc & 0b1000) ) { adjustServo( F12 ) ; }
 
     prevFunc = Func ;
@@ -186,6 +188,7 @@ void shortCircuit()
             throttle.setState( 0 ) ;
             Xnet.setPower( csShortCircuit ) ;
         }
+        
     } END_REPEAT ;
 }
 
