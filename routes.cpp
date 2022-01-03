@@ -1,19 +1,20 @@
 #include "routes.h"
 #include "macros.h"
+#include "io.h"
 
 
 extern void setOutput( uint8_t Address, uint8_t functions ) ;
 extern void setTurnout( uint8_t address, uint8_t state ) ; 
-extern const uint8_t relay[] ;
 
-enum routeStates = 
+
+enum routeStates
 {
-    free,
+    freed,
     setting,
     set,
 } ;
 
-uint8_t counter,  selectedRoute, route = free  ;
+uint8_t counter,  selectedRoute, route = freed  ;
 const int elementsPerRoute  =    7 ;
 const int C                 = 0x80 ;                                            //    curved
 const int S                 = 0x00 ;                                            //  straight
@@ -30,7 +31,7 @@ void freeRoute()
         digitalWrite( relay[i], 1 ) ;                                           // turn off relays
     }
     
-    route = free ;
+    route = freed ;
 }
 
 uint8_t  getNewRoute ( uint8_t first, uint8_t second )
@@ -156,7 +157,7 @@ void setRoute( uint8_t track )
 {
     static uint8_t firstButton, secondButton ;
     
-    if( route != free ) return ;                                                // if route is not free, do not set a new one
+    if( route != freed ) return ;                                                // if route is not free, do not set a new one
 
     if( firstButton  == 0xFF ) firstButton  = track ;
     if( secondButton == 0xFF ) secondButton = track ;
