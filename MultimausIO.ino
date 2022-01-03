@@ -124,7 +124,7 @@ void setOutput( uint8_t Address, uint8_t functions )
             uint8_t state ;
 
             if( functions & bitMask ) state = 1 ;    // on
-            else                      state = 0 ;    // off
+            else                      state = 0 ;    // off        
 
             if(      ioNumber <=  8 ) setTurnout( ioNumber - 1 , state ) ;             //  1 <->  8
             else if( ioNumber <= 18 ) digitalWrite( relay[ioNumber-11], state^1 ) ;    // 11 <-> 18

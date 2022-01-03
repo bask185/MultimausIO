@@ -6,6 +6,9 @@
 extern void setOutput( uint8_t Address, uint8_t functions ) ;
 extern void setTurnout( uint8_t address, uint8_t state ) ; 
 
+uint8_t  firstButton = 0xFF ;
+uint8_t secondButton = 0xFF ;
+
 
 enum routeStates
 {
@@ -30,17 +33,19 @@ void freeRoute()
     {
         digitalWrite( relay[i], 1 ) ;                                           // turn off relays
     }
-    
+    firstButton  = 0xFF ;
+    secondButton = 0xFF ;
     route = freed ;
 }
 
 uint8_t  getNewRoute ( uint8_t first, uint8_t second )
 {
     if( second < first )                                                        // route 1 <> 9 is the same as route 9 <> 1, 
-    {                                                                           // therefor I use XOR ensure that the first number is the lowest
-        first  ^= second ;
-        second ^=  first ;
-        first  ^= second ;
+    {
+        uint8_t temp ;                                                                           // therefor I use XOR ensure that the first number is the lowest
+        temp    = first  ;
+        first   = second ;
+        second  = temp ;
     }
 
     switch ( first ) {
@@ -64,6 +69,8 @@ uint8_t  getNewRoute ( uint8_t first, uint8_t second )
     case 6: switch( second ) { case 8 : return 16 ;
                                case 9 : return 17 ; }
     }
+
+    return 1 ;
 }
 
 /*   8x8 possible routes in theory.
@@ -128,7 +135,7 @@ void layRoutes()
 {
     if( route != setting ) return ;
 
-    REPEAT_MS( 350 )
+    REPEAT_MS( 1000 )
     {
         uint8_t address = X ;
         bool    state   ;
@@ -154,26 +161,25 @@ void layRoutes()
 }
 
 void setRoute( uint8_t track )
-{
-    static uint8_t firstButton, secondButton ;
-    
-    for( int i = 0 ; i < 8 ; i ++ )
-    {
-        digitalWrite( relay[i], track >> i ) ;                                  // turn off relays
-    }
+{    
+    track++ ;
     
     if( route != freed ) return ;                                               // if route is not free, do not set a new one
 
-    if( firstButton  == 0xFF ) firstButton  = track ;
-    if( secondButton == 0xFF ) secondButton = track ;
+    if(      firstButton  == 0xFF ) firstButton  = track ;
+    else if( secondButton == 0xFF ) secondButton = track ;
 
     if( firstButton != 0xFF && secondButton != 0xFF )
     {
-        secondButton = firstButton = 0xFF ;
-
         selectedRoute  =  getNewRoute ( firstButton, secondButton ) - 1 ;
-        counter = 0 ;                                                           // trigger the function "layRoutes" to start laying in the route
 
-        route = setting ;
+        for( int i = 0 ; i < 8 ; i ++ ) // seems to work so far
+        {
+            digitalWrite( relay[i], (selectedRoute & 1) ^ 1 ) ;                              // turn on relays
+            selectedRoute >>= 1 ;
+        }
+        secondButton = firstButton = 0xFF ;
+        //counter = 0 ;                                                           // trigger the function "layRoutes" to start laying in the route
+        //route = setting ;
     }
 }
