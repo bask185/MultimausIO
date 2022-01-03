@@ -6,12 +6,32 @@ extern void setOutput( uint8_t Address, uint8_t functions ) ;
 extern void setTurnout( uint8_t address, uint8_t state ) ; 
 extern const uint8_t relay[] ;
 
-uint8_t counter,  selectedRoute  ;
+enum routeStates = 
+{
+    free,
+    setting,
+    set,
+} ;
+
+uint8_t counter,  selectedRoute, route = free  ;
 const int elementsPerRoute  =    7 ;
 const int C                 = 0x80 ;                                            //    curved
 const int S                 = 0x00 ;                                            //  straight
 const int X                 = 0xFF ;                                            // dont care
 
+
+
+void freeRoute()
+{
+    if( route != set ) return ;                                                 // route can be freed only after it is is set.
+    
+    for( int i = 0 ; i < 8 ; i ++ )
+    {
+        digitalWrite( relay[i], 1 ) ;                                           // turn off relays
+    }
+    
+    route = free ;
+}
 
 uint8_t  getNewRoute ( uint8_t first, uint8_t second )
 {
@@ -105,7 +125,7 @@ const int routes[17][7] =
 
 void layRoutes()
 {
-    if( elementsPerRoute >= 7 ) return ;
+    if( route != setting ) return ;
 
     REPEAT_MS( 350 )
     {
@@ -117,7 +137,11 @@ void layRoutes()
             address = (routes[ selectedRoute ][counter]  & 0x7F) - 1 ;          // fetch new address
             state   =  routes[ selectedRoute ][counter] >> 7 ;
 
-            if( ++ counter >= elementsPerRoute ) return ;
+            if( ++ counter >= elementsPerRoute )                                // if all elements are set -> return
+            {
+                route = set ;
+                return ;
+            }
         }
 
         if( counter <= 4 )  setTurnout( address, state ) ;                      // 0-4 -> any of the 5 points
@@ -131,6 +155,8 @@ void layRoutes()
 void setRoute( uint8_t track )
 {
     static uint8_t firstButton, secondButton ;
+    
+    if( route != free ) return ;                                                // if route is not free, do not set a new one
 
     if( firstButton  == 0xFF ) firstButton  = track ;
     if( secondButton == 0xFF ) secondButton = track ;
@@ -141,5 +167,7 @@ void setRoute( uint8_t track )
 
         selectedRoute  =  getNewRoute ( firstButton, secondButton ) - 1 ;
         counter = 0 ;                                                           // trigger the function "layRoutes" to start laying in the route
+    
+        route = setting ;
     }
 }

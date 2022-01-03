@@ -9,7 +9,7 @@
 const int F1_F4 = 0 ;
 const int F5_F8 = 0x80 ;
 
-const int ACCEL_FACTOR  =     20 ;
+const int ACCEL_FACTOR  =     30 ;
 const int SPEED_MAX     =     70 ;
 const int SPEED_MIN     =      1 ;
 const int MAX_CURRENT   =     50 ;  // 1 Ampere over 0.5R -> 0.5V -> 0.5 / 5V * 1023 = 102
@@ -153,10 +153,12 @@ void notifyXNetLocoFunc3( uint16_t Address, uint8_t Func )
 
 void notifyXNetPower(uint8_t State) 
 {
+    freeRoute() ;
+    
     if( State == csNormal )
     {
         digitalWrite( ledPin, HIGH ) ; 
-        throttle.setState( 1 ) ; 
+        throttle.setState( 1 ) ;
     }
     else
     {
