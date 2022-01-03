@@ -157,7 +157,12 @@ void setRoute( uint8_t track )
 {
     static uint8_t firstButton, secondButton ;
     
-    if( route != freed ) return ;                                                // if route is not free, do not set a new one
+    for( int i = 0 ; i < 8 ; i ++ )
+    {
+        digitalWrite( relay[i], track >> i ) ;                                  // turn off relays
+    }
+    
+    if( route != freed ) return ;                                               // if route is not free, do not set a new one
 
     if( firstButton  == 0xFF ) firstButton  = track ;
     if( secondButton == 0xFF ) secondButton = track ;
@@ -168,7 +173,7 @@ void setRoute( uint8_t track )
 
         selectedRoute  =  getNewRoute ( firstButton, secondButton ) - 1 ;
         counter = 0 ;                                                           // trigger the function "layRoutes" to start laying in the route
-    
+
         route = setting ;
     }
 }
